@@ -1,45 +1,74 @@
-// Retrieve "Active" list
 var activeList = document.querySelector( 'ul' );
 
-// Retrieve "Completed" List
-var completedList = document.querySelector( 'ul:last-of-type');
+var completedList = document.querySelector( 'ul:last-of-type' );
 
-// Retrieve the to-do input
 var newTask = document.querySelector( '[name="new-task"]' );
 
-// Select our form
 var form = document.querySelector( 'form' );
-// We liste to our form for  submission
-form.addEventListener( 'submit', function (event) {
-    // Prevent a page-refresh from a REAL form submission
+
+form.addEventListener( 'submit', function ( event ) {
+
     event.preventDefault();
+
+    var startDateString = formatDateString();
 
     activeList.innerHTML += `
         <li>
             <input type="checkbox">
             ` + newTask.value + `
+            <time><strong>Start:</strong> ` + startDateString + `</time>
             <button>Delete</button>
         </li>
     `;
-    // Grab our brand new checkbox (The last LI will always be the newest one)
-    var newCheckboxes = document.querySelectorAll( 'ul:first-of-type li [type="checkbox"]');
-    for ( var i = 0; i < newCheckboxes.length; i++) {
+
+    var newCheckboxes = document.querySelectorAll( 'ul [type="checkbox"]' );
+
+    for ( var i = 0; i < newCheckboxes.length; i++ ) {
         var newCheckbox = newCheckboxes[i];
-        //Listen for a click on this section
+
+        var li = newCheckbox.parentNode;
+
+        var button = li.children[2]; 
+
+        button.addEventListener( 'click', function (event) {
+            var isInActiveList = false;
+            for ( var i = 0; i < activeList.children.length; i++ ) {
+                if ( li === activeList.children[i] ) {
+                    isInActiveList = true; 
+                }
+            }
+            if ( isInActiveList ) {
+                activeList.removeChild( li );
+            } else {
+                completedList.removeChild( li );
+            }
+        } );       
         newCheckbox.addEventListener( 'click', function ( event ) {
-            //Grab the associated LI
-            var li = this.parentNode;
+            li.removeChild( newCheckbox );
+           
+            var endTime = document.createElement( 'TIME' );
+            endTime.innerHTML += '<strong>End:</strong> ' + formatDateString();
 
-            // Delete THIS clicked checkbox
-            li.removeChild( this );
+            li.appendChild( endTime );
 
-            // Move the LI to our completed UL
             completedList.appendChild( li );
         } );
     }
+} );
+function formatDateString () {
 
-    document.querySelector( '[name="new-task"]' ).value="";
-   
+    var date = new Date();
+    var dateString =
+      date.getDate() +
+      '-' +
+      ( Number( date.getMonth() ) + 1 ) + 
+      '-' +
+      date.getFullYear() +
+      ' ' +
+      date.getHours() +
+      ':' +
+      date.getMinutes() +
+      ':' +
+      date.getSeconds();
+    return dateString;
 }
-);
-
